@@ -15,6 +15,11 @@ pub struct Colour {
 }
 
 impl Colour {
+    const BLACK: Self = Self {
+        r: 0f64,
+        g: 0f64,
+        b: 0f64,
+    };
     pub fn random() -> Self {
         let mut rng = rand::thread_rng();
         let dist = Uniform::new(0f64, 1f64);
@@ -25,6 +30,22 @@ impl Colour {
         }
     }
 
+    fn scale(&self, scale: f64) -> Self {
+        Self {
+            r: self.r * scale,
+            g: self.g * scale,
+            b: self.b * scale,
+        }
+    }
+
+    fn add(self, other: Colour) -> Self {
+        Self {
+            r: self.r + other.r,
+            g: self.g + other.g,
+            b: self.b + other.b,
+        }
+    }
+
     pub fn mix(colours: &VecDeque<Colour>) -> Self {
         // TODO: a random mixture instead of the average
         let quants = (0..colours.len()).map(|_| 1f64).collect::<Vec<_>>();
@@ -32,23 +53,8 @@ impl Colour {
         colours
             .iter()
             .zip(quants)
-            .map(|(c, q)| Colour {
-                r: c.r * q * scale,
-                g: c.g * q * scale,
-                b: c.b * q * scale,
-            })
-            .fold(
-                Colour {
-                    r: 0f64,
-                    g: 0f64,
-                    b: 0f64,
-                },
-                |c1, c2| Colour {
-                    r: c1.r + c2.r,
-                    g: c1.g + c2.g,
-                    b: c1.b + c2.b,
-                },
-            )
+            .map(|(c, q)| c.scale(q * scale))
+            .fold(Colour::BLACK, Colour::add)
     }
 }
 
