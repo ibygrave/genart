@@ -47,8 +47,12 @@ impl Colour {
     }
 
     pub fn mix(colours: &VecDeque<Colour>) -> Self {
-        // TODO: a random mixture instead of the average
-        let quants = (0..colours.len()).map(|_| 1f64).collect::<Vec<_>>();
+        let mut rng = rand::thread_rng();
+        let dist = Uniform::new(0f64, 1f64);
+        let quants = colours
+            .iter()
+            .map(|_| dist.sample(&mut rng))
+            .collect::<Vec<_>>();
         let scale = 1f64 / quants.iter().sum::<f64>();
         colours
             .iter()
