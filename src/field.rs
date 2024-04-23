@@ -23,7 +23,7 @@ impl Field {
     }
 
     pub fn inc(&mut self, x: i32, y: i32) -> Result<()> {
-        if x < 0 || x >= self.surface.width() || y < 0 || y > self.surface.height() {
+        if x < 0 || x >= self.surface.width() || y < 0 || y >= self.surface.height() {
             return Ok(());
         }
         let pixel_ix = self.surface.stride() * y + 4 * x;
