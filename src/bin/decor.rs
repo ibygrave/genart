@@ -33,6 +33,7 @@ fn main() -> Result<()> {
     let field = Field::new(&args.field)?;
     let colours = Colours::random();
     let region = Region::new(&args.field, args.border);
-    region.render(&field, &colours, args.depth)?;
+    let ctx = cairo::Context::new(&field.surface)?;
+    region.render(&ctx, &colours, args.depth)?;
     Ok(())
 }

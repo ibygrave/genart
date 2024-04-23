@@ -108,22 +108,22 @@ impl Region {
         )
     }
 
-    pub fn render(&self, field: &Field, colours: &Colours, depth: u8) -> Result<()> {
+    pub fn render(&self, ctx: &cairo::Context, colours: &Colours, depth: u8) -> Result<()> {
         let grad = self.get_gradient();
         colours.add_gradient_stops(&grad);
-        field.ctx.set_source(&grad)?;
-        field.ctx.rectangle(
+        ctx.set_source(&grad)?;
+        ctx.rectangle(
             f64::from(self.x.min),
             f64::from(self.y.min),
             f64::from(self.x.size),
             f64::from(self.y.size),
         );
-        field.ctx.fill()?;
+        ctx.fill()?;
         if (depth > 0) && self.is_splittable() {
             let (rl, rr) = self.split();
             let (cl, cr) = colours.split();
-            rl.render(field, &cl, depth - 1)?;
-            rr.render(field, &cr, depth - 1)?;
+            rl.render(ctx, &cl, depth - 1)?;
+            rr.render(ctx, &cr, depth - 1)?;
         }
         Ok(())
     }

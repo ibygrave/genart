@@ -4,24 +4,38 @@ use anyhow::{Context, Result};
 
 pub struct Field {
     filename: PathBuf,
-    surface: cairo::ImageSurface,
-    pub ctx: cairo::Context,
+    pub surface: cairo::ImageSurface,
 }
 
 impl Field {
     pub fn new(args: &SubArgs) -> Result<Self> {
         let surface = cairo::ImageSurface::create(cairo::Format::Rgb24, args.size.0, args.size.1)?;
-        let ctx = cairo::Context::new(&surface)?;
         Ok(Self {
             filename: args.output.clone(),
             surface,
-            ctx,
         })
     }
 
     pub fn save(&self) -> Result<()> {
         let mut file = std::fs::File::create(&self.filename)?;
         self.surface.write_to_png(&mut file)?;
+        Ok(())
+    }
+
+    pub fn inc(&mut self, x: i32, y: i32) -> Result<()> {
+        if x < 0 || x >= self.surface.width() || y < 0 || y > self.surface.height() {
+            return Ok(());
+        }
+        let pixel_ix = self.surface.stride() * y + 4 * x;
+        let mut data = self.surface.data()?;
+        for channel in [2, 1, 0] {
+            let subpixel_ix = usize::try_from(pixel_ix + channel)?;
+            if data[subpixel_ix] == 255 {
+                continue;
+            }
+            data[subpixel_ix] += 1;
+            break;
+        }
         Ok(())
     }
 }
@@ -43,7 +57,7 @@ fn parse_size(arg: &str) -> Result<Size> {
 #[derive(clap::Args, Debug)]
 pub struct SubArgs {
     /// Output file
-    #[arg(value_name = "OUTPUT", default_value = "default_decor.png")]
+    #[arg(value_name = "OUTPUT", default_value = "default.png")]
     output: PathBuf,
 
     #[arg(short, long, value_parser = parse_size, default_value = "1024x1024")]
