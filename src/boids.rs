@@ -1,10 +1,11 @@
-use std::ops::Range;
+use std::{borrow::BorrowMut, ops::Range};
 
 use anyhow::Result;
 use rand::{distributions::Distribution, Rng};
 
 use crate::field::Field;
 
+#[derive(Clone, Copy)]
 pub struct Boid {
     x: f64,
     y: f64,
@@ -15,9 +16,27 @@ pub struct Boid {
 }
 
 impl Boid {
-    fn update(&mut self) {
+    fn move_to(&mut self, other: &Boid, scale: f64) {
+        let dx = other.x - self.x;
+        let dy = other.y - self.y;
+        let h = (dx * dx + dy * dy).sqrt();
+        self.dx += scale * (dx / h);
+        self.dy += scale * (dy / h);
+    }
+
+    fn update(&mut self, x_range: Range<f64>, y_range: Range<f64>) {
         self.x += self.dx;
         self.y += self.dy;
+        if self.x > x_range.end {
+            self.x = x_range.start;
+        } else if self.x < x_range.start {
+            self.x = x_range.end;
+        }
+        if self.y > y_range.end {
+            self.y = y_range.start;
+        } else if self.y < y_range.start {
+            self.y = y_range.end;
+        }
     }
 }
 
@@ -65,7 +84,18 @@ impl Boids {
     }
 
     pub fn update(&mut self) {
-        self.boids.iter_mut().for_each(Boid::update);
+        (0..self.boids.len()).for_each(|ix| {
+            let follow = self.boids[self.boids[ix].follow];
+            let flee = self.boids[self.boids[ix].flee];
+            let boid = self.boids[ix].borrow_mut();
+            boid.dx *= 0.95;
+            boid.dy *= 0.95;
+            boid.move_to(&follow, 0.05);
+            boid.move_to(&flee, -0.05);
+        });
+        self.boids
+            .iter_mut()
+            .for_each(|boid| boid.update(0.0..(self.width as f64), 0.0..(self.height as f64)));
     }
 
     pub fn imprint(&self, field: &mut Field) -> Result<()> {

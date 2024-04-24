@@ -25,7 +25,10 @@ fn main() -> Result<()> {
     let args = Args::parse();
     let mut field = Field::new(&args.field)?;
     let mut boids = Boids::new(args.boids, field.surface.width(), field.surface.height());
-    for _ in 0..500 {
+    for _ in 0..1_000 {
+        boids.update();
+    }
+    for _ in 0..10_000_000 {
         boids.update();
         boids.imprint(&mut field)?;
     }
