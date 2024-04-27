@@ -1,6 +1,6 @@
 use rand::Rng;
 
-use crate::{field::Field, Colours};
+use crate::Colours;
 use anyhow::Result;
 
 #[derive(Copy, Clone)]

@@ -1,5 +1,6 @@
 use anyhow::Result;
 use clap::Parser;
+use indicatif::ProgressBar;
 
 #[path = "../boids.rs"]
 mod boids;
@@ -19,18 +20,32 @@ struct Args {
 
     #[arg(short, long, default_value_t = 100_000)]
     boids: usize,
+
+    #[arg(short, long, default_value_t = 1_000)]
+    move_steps: u64,
+
+    #[arg(short, long, default_value_t = 10_000)]
+    draw_steps: u64,
 }
 
 fn main() -> Result<()> {
     let args = Args::parse();
     let mut field = Field::new(&args.field)?;
     let mut boids = Boids::new(args.boids, field.surface.width(), field.surface.height());
-    for _ in 0..1_000 {
+    println!("Moving...");
+    let pb = ProgressBar::new(args.move_steps);
+    for _ in 0..args.move_steps {
         boids.update();
+        pb.inc(1);
     }
-    for _ in 0..10_000_000 {
+    pb.finish_and_clear();
+    println!("Drawing...");
+    let pb = ProgressBar::new(args.draw_steps);
+    for _ in 0..args.draw_steps {
         boids.update();
         boids.imprint(&mut field)?;
+        pb.inc(1);
     }
+    pb.finish_with_message("done");
     Ok(())
 }
