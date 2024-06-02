@@ -8,7 +8,7 @@ pub struct Field {
 }
 
 impl Field {
-    pub fn new(args: &SubArgs) -> Result<Self> {
+    pub fn new(args: &FieldArgs) -> Result<Self> {
         let surface = cairo::ImageSurface::create(cairo::Format::Rgb24, args.size.0, args.size.1)?;
         Ok(Self {
             filename: args.output.clone(),
@@ -54,8 +54,9 @@ fn parse_size(arg: &str) -> Result<Size> {
     Ok(Size(w.parse()?, h.parse()?))
 }
 
+#[allow(clippy::module_name_repetitions)]
 #[derive(clap::Args, Debug)]
-pub struct SubArgs {
+pub struct FieldArgs {
     /// Output file
     #[arg(value_name = "OUTPUT", default_value = "default.png")]
     output: PathBuf,

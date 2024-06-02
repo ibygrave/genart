@@ -45,7 +45,8 @@ pub struct Region {
 }
 
 impl Region {
-    pub fn new(args: &crate::field::SubArgs, border: i32) -> Self {
+    #[must_use]
+    pub fn new(args: &crate::field::FieldArgs, border: i32) -> Self {
         Self {
             x: Range::new(0, args.size.0, border),
             y: Range::new(0, args.size.1, border),

@@ -65,6 +65,7 @@ impl Colour {
 pub struct Colours(VecDeque<Colour>);
 
 impl Colours {
+    #[must_use]
     pub fn random() -> Self {
         Self(VecDeque::from([
             Colour::random(),
@@ -75,6 +76,7 @@ impl Colours {
         ]))
     }
 
+    #[must_use]
     pub fn split(&self) -> (Self, Self) {
         let mut left = self.0.clone();
         let mut right = self.0.clone();

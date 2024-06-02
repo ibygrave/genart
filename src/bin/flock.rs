@@ -2,21 +2,14 @@ use anyhow::Result;
 use clap::Parser;
 use indicatif::ProgressBar;
 
-#[path = "../boids.rs"]
-mod boids;
-
-#[path = "../field.rs"]
-mod field;
-
-use crate::boids::Flock;
-use crate::field::Field;
+use genart::{Field, FieldArgs, Flock};
 
 /// Heat-map of flocking boids
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about=None)]
 struct Args {
     #[command(flatten)]
-    field: crate::field::SubArgs,
+    field: FieldArgs,
 
     #[arg(short, long, default_value_t = 100_000)]
     boids: usize,

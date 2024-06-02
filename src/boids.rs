@@ -47,6 +47,7 @@ pub struct Flock {
 }
 
 impl Flock {
+    #[must_use]
     pub fn new(nboids: usize, width: i32, height: i32) -> Self {
         #![allow(clippy::cast_lossless)]
         let mut rng = rand::thread_rng();
