@@ -40,13 +40,13 @@ impl Boid {
     }
 }
 
-pub struct Boids {
+pub struct Flock {
     boids: Vec<Boid>,
     width: i32,
     height: i32,
 }
 
-impl Boids {
+impl Flock {
     pub fn new(nboids: usize, width: i32, height: i32) -> Self {
         #![allow(clippy::cast_lossless)]
         let mut rng = rand::thread_rng();

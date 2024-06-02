@@ -8,7 +8,7 @@ mod boids;
 #[path = "../field.rs"]
 mod field;
 
-use crate::boids::Boids;
+use crate::boids::Flock;
 use crate::field::Field;
 
 /// Heat-map of flocking boids
@@ -31,7 +31,7 @@ struct Args {
 fn main() -> Result<()> {
     let args = Args::parse();
     let mut field = Field::new(&args.field)?;
-    let mut boids = Boids::new(args.boids, field.surface.width(), field.surface.height());
+    let mut boids = Flock::new(args.boids, field.surface.width(), field.surface.height());
     println!("Moving...");
     let pb = ProgressBar::new(args.move_steps);
     for _ in 0..args.move_steps {
