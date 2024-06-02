@@ -93,9 +93,9 @@ impl Boids {
             boid.move_to(&follow, 0.05);
             boid.move_to(&flee, -0.05);
         });
-        self.boids
-            .iter_mut()
-            .for_each(|boid| boid.update(0.0..(self.width as f64), 0.0..(self.height as f64)));
+        self.boids.iter_mut().for_each(|boid| {
+            boid.update(0.0..(f64::from(self.width)), 0.0..(f64::from(self.height)));
+        });
     }
 
     pub fn imprint(&self, field: &mut Field) -> Result<()> {
