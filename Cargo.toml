@@ -9,7 +9,7 @@ pedantic = "warn"
 
 [dependencies]
 anyhow = "1.0.82"
-cairo-rs = { version = "0.19.4", features = ["png"] }
+cairo-rs = { version = "0.20.0", features = ["png"] }
 clap = { version = "4.5.4", features = ["derive"] }
 indicatif = "0.17.8"
 rand = "0.8.5"
