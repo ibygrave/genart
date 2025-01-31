@@ -20,7 +20,7 @@ struct Args {
 fn main() -> Result<()> {
     let args = Args::parse();
     let field = Field::new(&args.field)?;
-    let colours = Colours::random();
+    let colours = Colours::random()?;
     let region = Region::new(&args.field, args.border);
     let ctx = cairo::Context::new(&field.surface)?;
     region.render(&ctx, &colours, args.depth)?;

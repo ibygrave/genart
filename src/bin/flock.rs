@@ -24,7 +24,7 @@ struct Args {
 fn main() -> Result<()> {
     let args = Args::parse();
     let mut field = Field::new(&args.field)?;
-    let mut boids = Flock::new(args.boids, field.surface.width(), field.surface.height());
+    let mut boids = Flock::new(args.boids, field.surface.width(), field.surface.height())?;
     println!("Moving...");
     let pb = ProgressBar::new(args.move_steps);
     for _ in 0..args.move_steps {

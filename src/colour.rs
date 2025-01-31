@@ -2,8 +2,9 @@
 
 use std::collections::VecDeque;
 
+use anyhow::Result;
 use rand::{
-    distributions::{Distribution, Uniform},
+    distr::{Distribution, Uniform},
     Rng,
 };
 
@@ -20,14 +21,14 @@ impl Colour {
         g: 0f64,
         b: 0f64,
     };
-    pub fn random() -> Self {
-        let mut rng = rand::thread_rng();
-        let dist = Uniform::new(0f64, 1f64);
-        Self {
+    pub fn random() -> Result<Self> {
+        let mut rng = rand::rng();
+        let dist = Uniform::new(0f64, 1f64)?;
+        Ok(Self {
             r: dist.sample(&mut rng),
             g: dist.sample(&mut rng),
             b: dist.sample(&mut rng),
-        }
+        })
     }
 
     fn scale(&self, scale: f64) -> Self {
@@ -46,38 +47,36 @@ impl Colour {
         }
     }
 
-    pub fn mix(colours: &VecDeque<Colour>) -> Self {
-        let mut rng = rand::thread_rng();
-        let dist = Uniform::new(0f64, 1f64);
+    pub fn mix(colours: &VecDeque<Colour>) -> Result<Self> {
+        let mut rng = rand::rng();
+        let dist = Uniform::new(0f64, 1f64)?;
         let quants = colours
             .iter()
             .map(|_| dist.sample(&mut rng))
             .collect::<Vec<_>>();
         let scale = 1f64 / quants.iter().sum::<f64>();
-        colours
+        Ok(colours
             .iter()
             .zip(quants)
             .map(|(c, q)| c.scale(q * scale))
-            .fold(Colour::BLACK, Colour::add)
+            .fold(Colour::BLACK, Colour::add))
     }
 }
 
 pub struct Colours(VecDeque<Colour>);
 
 impl Colours {
-    #[must_use]
-    pub fn random() -> Self {
-        Self(VecDeque::from([
-            Colour::random(),
-            Colour::random(),
-            Colour::random(),
-            Colour::random(),
-            Colour::random(),
-        ]))
+    pub fn random() -> Result<Self> {
+        Ok(Self(VecDeque::from([
+            Colour::random()?,
+            Colour::random()?,
+            Colour::random()?,
+            Colour::random()?,
+            Colour::random()?,
+        ])))
     }
 
-    #[must_use]
-    pub fn split(&self) -> (Self, Self) {
+    pub fn split(&self) -> Result<(Self, Self)> {
         let mut left = self.0.clone();
         let mut right = self.0.clone();
 
@@ -87,10 +86,10 @@ impl Colours {
         }
 
         // enhance the two new colour lists with random new colours
-        let mut rng = rand::thread_rng();
-        left.insert(rng.gen_range(0..left.len()), Colour::mix(&left));
-        right.insert(rng.gen_range(0..right.len()), Colour::mix(&right));
-        (Self(left), Self(right))
+        let mut rng = rand::rng();
+        left.insert(rng.random_range(0..left.len()), Colour::mix(&left)?);
+        right.insert(rng.random_range(0..right.len()), Colour::mix(&right)?);
+        Ok((Self(left), Self(right)))
     }
 
     pub fn add_gradient_stops(&self, gradient: &cairo::LinearGradient) {
