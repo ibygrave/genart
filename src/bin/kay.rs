@@ -18,23 +18,19 @@ struct Args {
 }
 
 fn pixel_average<'a>(pixels: impl Iterator<Item = &'a Rgb<u8>>) -> Rgb<u8> {
-    let mut r = 0u64;
-    let mut g = 0u64;
-    let mut b = 0u64;
+    let mut total = Rgb([0u64; 3]);
     let mut count = 0u64;
     for p in pixels {
-        r += u64::from(p[0]);
-        g += u64::from(p[1]);
-        b += u64::from(p[2]);
+        for s in 0..3 {
+            total[s] += u64::from(p[s]);
+        }
         count += 1;
     }
-    r /= count;
-    g /= count;
-    b /= count;
+    let av = total.map(|s| s / count);
     Rgb([
-        u8::try_from(r).unwrap(),
-        u8::try_from(g).unwrap(),
-        u8::try_from(b).unwrap(),
+        u8::try_from(av[0]).unwrap(),
+        u8::try_from(av[1]).unwrap(),
+        u8::try_from(av[2]).unwrap(),
     ])
 }
 
