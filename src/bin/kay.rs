@@ -23,23 +23,6 @@ struct Args {
     output: PathBuf,
 }
 
-fn pixel_average<'a>(pixels: impl Iterator<Item = &'a Rgb<u8>>) -> Rgb<u8> {
-    let mut total = Rgb([0u64; 3]);
-    let mut count = 0u64;
-    for p in pixels {
-        for s in 0..3 {
-            total[s] += u64::from(p[s]);
-        }
-        count += 1;
-    }
-    let av = total.map(|s| s / count);
-    Rgb([
-        u8::try_from(av[0]).unwrap(),
-        u8::try_from(av[1]).unwrap(),
-        u8::try_from(av[2]).unwrap(),
-    ])
-}
-
 struct ImageScans {
     x: Vec<Rgb<u8>>,
     y: Vec<Rgb<u8>>,
@@ -73,11 +56,13 @@ impl<P: Pixel> RowColumn<P> for ImageBuffer<P, Vec<P::Subpixel>> {
 }
 
 impl ImageScans {
-    fn new(img: &ImageBuffer<Rgb<u8>, Vec<u8>>) -> Self {
+    fn new(img: &ImageBuffer<Rgb<u8>, Vec<u8>>, config: &KayConfig) -> Self {
         let (xsize, ysize) = img.dimensions();
         Self {
-            x: (0..xsize).map(|x| pixel_average(img.column(x))).collect(),
-            y: (0..ysize).map(|y| pixel_average(img.row(y))).collect(),
+            x: (0..xsize)
+                .map(|x| config.scan_x.scan(img.column(x)))
+                .collect(),
+            y: (0..ysize).map(|y| config.scan_y.scan(img.row(y))).collect(),
         }
     }
 }
@@ -86,7 +71,7 @@ fn main() -> Result<()> {
     let args = Args::parse();
     let mut img = image::open(args.input)?;
     let pixels = img.as_mut_rgb8().unwrap();
-    let scans = ImageScans::new(pixels);
+    let scans = ImageScans::new(pixels, &args.config);
     for (x, y, pixel) in pixels.enumerate_pixels_mut() {
         let r = args
             .config

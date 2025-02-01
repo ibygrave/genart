@@ -5,6 +5,7 @@ use std::{
 };
 
 use anyhow::Result;
+use image::{Pixel, Rgb};
 
 #[derive(Clone, Debug)]
 pub enum PixelCalc {
@@ -20,6 +21,29 @@ impl PixelCalc {
             PixelCalc::Max => max(x, y),
             PixelCalc::Av => (x + y) / 2,
         }
+    }
+
+    pub fn scan<'a>(&self, pixels: impl Iterator<Item = &'a Rgb<u8>>) -> Rgb<u8> {
+        let mut ans = Rgb([0u64; 3]);
+        let mut count = 0u64;
+        for p in pixels {
+            for s in 0..3 {
+                ans[s] = match self {
+                    PixelCalc::Min => min(ans[s], u64::from(p[s])),
+                    PixelCalc::Max => max(ans[s], u64::from(p[s])),
+                    PixelCalc::Av => ans[s] + u64::from(p[s]),
+                }
+            }
+            count += 1;
+        }
+        if let PixelCalc::Av = self {
+            ans = ans.map(|s| s / count);
+        }
+        Rgb([
+            u8::try_from(ans[0]).unwrap(),
+            u8::try_from(ans[1]).unwrap(),
+            u8::try_from(ans[2]).unwrap(),
+        ])
     }
 
     fn parse_next(chars: &mut impl Iterator<Item = char>) -> Result<Self, String> {
@@ -53,6 +77,8 @@ impl Display for PixelCalc {
 
 #[derive(Clone, Debug)]
 pub struct KayConfig {
+    pub scan_x: PixelCalc,
+    pub scan_y: PixelCalc,
     pub calc_r: PixelCalc,
     pub calc_g: PixelCalc,
     pub calc_b: PixelCalc,
@@ -61,6 +87,8 @@ pub struct KayConfig {
 impl Default for KayConfig {
     fn default() -> Self {
         Self {
+            scan_x: PixelCalc::Av,
+            scan_y: PixelCalc::Av,
             calc_r: PixelCalc::Min,
             calc_g: PixelCalc::Min,
             calc_b: PixelCalc::Min,
@@ -74,6 +102,8 @@ impl FromStr for KayConfig {
     fn from_str(s: &str) -> std::result::Result<Self, Self::Err> {
         let mut chars = s.chars();
         Ok(Self {
+            scan_x: PixelCalc::parse_next(&mut chars)?,
+            scan_y: PixelCalc::parse_next(&mut chars)?,
             calc_r: PixelCalc::parse_next(&mut chars)?,
             calc_g: PixelCalc::parse_next(&mut chars)?,
             calc_b: PixelCalc::parse_next(&mut chars)?,
@@ -83,6 +113,10 @@ impl FromStr for KayConfig {
 
 impl Display for KayConfig {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}{}{}", self.calc_r, self.calc_g, self.calc_b)
+        write!(
+            f,
+            "{}{}{}{}{}",
+            self.scan_x, self.scan_y, self.calc_r, self.calc_g, self.calc_b
+        )
     }
 }
