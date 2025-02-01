@@ -23,9 +23,9 @@ fn pixel_average<'a>(pixels: impl Iterator<Item = &'a Rgb<u8>>) -> Rgb<u8> {
     let mut b = 0u64;
     let mut count = 0u64;
     for p in pixels {
-        r += u64::from(p.0[0]);
-        g += u64::from(p.0[1]);
-        b += u64::from(p.0[2]);
+        r += u64::from(p[0]);
+        g += u64::from(p[1]);
+        b += u64::from(p[2]);
         count += 1;
     }
     r /= count;
@@ -86,9 +86,9 @@ fn main() -> Result<()> {
     let pixels = img.as_mut_rgb8().unwrap();
     let scans = ImageScans::new(pixels);
     for (x, y, pixel) in pixels.enumerate_pixels_mut() {
-        let r = min(scans.x[x as usize].0[0], scans.y[y as usize].0[0]);
-        let g = min(scans.x[x as usize].0[1], scans.y[y as usize].0[1]);
-        let b = min(scans.x[x as usize].0[2], scans.y[y as usize].0[2]);
+        let r = min(scans.x[x as usize][0], scans.y[y as usize][0]);
+        let g = min(scans.x[x as usize][1], scans.y[y as usize][1]);
+        let b = min(scans.x[x as usize][2], scans.y[y as usize][2]);
         *pixel = Rgb([r, g, b]);
     }
     img.save(args.output)?;
