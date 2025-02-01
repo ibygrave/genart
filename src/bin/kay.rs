@@ -1,13 +1,19 @@
-use std::{cmp::min, path::PathBuf};
+use std::path::PathBuf;
 
 use anyhow::Result;
 use clap::Parser;
 use image::{ImageBuffer, Pixel, Rgb};
 
+use genart::KayConfig;
+
 /// Image processing
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about=None)]
 struct Args {
+    /// Processing configuration
+    #[arg(short, long, default_value_t)]
+    config: KayConfig,
+
     /// Input file
     #[arg(value_name = "INPUT")]
     input: PathBuf,
@@ -82,9 +88,18 @@ fn main() -> Result<()> {
     let pixels = img.as_mut_rgb8().unwrap();
     let scans = ImageScans::new(pixels);
     for (x, y, pixel) in pixels.enumerate_pixels_mut() {
-        let r = min(scans.x[x as usize][0], scans.y[y as usize][0]);
-        let g = min(scans.x[x as usize][1], scans.y[y as usize][1]);
-        let b = min(scans.x[x as usize][2], scans.y[y as usize][2]);
+        let r = args
+            .config
+            .calc_r
+            .calc(scans.x[x as usize][0], scans.y[y as usize][0]);
+        let g = args
+            .config
+            .calc_g
+            .calc(scans.x[x as usize][1], scans.y[y as usize][1]);
+        let b = args
+            .config
+            .calc_b
+            .calc(scans.x[x as usize][2], scans.y[y as usize][2]);
         *pixel = Rgb([r, g, b]);
     }
     img.save(args.output)?;
