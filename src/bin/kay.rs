@@ -2,7 +2,7 @@ use std::{cmp::min, path::PathBuf};
 
 use anyhow::Result;
 use clap::Parser;
-use image::{ImageBuffer, Rgb};
+use image::{ImageBuffer, Pixel, Rgb};
 
 /// Image processing
 #[derive(Parser, Debug)]
@@ -43,18 +43,28 @@ struct ImageScans {
     y: Vec<Rgb<u8>>,
 }
 
-trait RowColumn {
-    fn row(&self, y: u32) -> impl Iterator<Item = &Rgb<u8>>;
-    fn column(&self, x: u32) -> impl Iterator<Item = &Rgb<u8>>;
+trait RowColumn<P: Pixel> {
+    fn row<'a>(&'a self, y: u32) -> impl Iterator<Item = &'a P>
+    where
+        P: 'a;
+    fn column<'a>(&'a self, x: u32) -> impl Iterator<Item = &'a P>
+    where
+        P: 'a;
 }
 
-impl RowColumn for ImageBuffer<Rgb<u8>, Vec<u8>> {
-    fn row(&self, y: u32) -> impl Iterator<Item = &Rgb<u8>> {
+impl<P: Pixel> RowColumn<P> for ImageBuffer<P, Vec<P::Subpixel>> {
+    fn row<'a>(&'a self, y: u32) -> impl Iterator<Item = &'a P>
+    where
+        P: 'a,
+    {
         let (xsize, _) = self.dimensions();
         (0..xsize).map(move |x| self.get_pixel(x, y))
     }
 
-    fn column(&self, x: u32) -> impl Iterator<Item = &Rgb<u8>> {
+    fn column<'a>(&'a self, x: u32) -> impl Iterator<Item = &'a P>
+    where
+        P: 'a,
+    {
         let (_, ysize) = self.dimensions();
         (0..ysize).map(move |y| self.get_pixel(x, y))
     }
