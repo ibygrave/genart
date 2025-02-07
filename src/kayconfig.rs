@@ -13,6 +13,7 @@ pub enum PixelCalc {
     Max,
     Av,
     Diff,
+    Zero,
 }
 
 impl PixelCalc {
@@ -28,6 +29,7 @@ impl PixelCalc {
                     y - x
                 }
             }
+            PixelCalc::Zero => 0,
         }
     }
 
@@ -41,6 +43,7 @@ impl PixelCalc {
                     PixelCalc::Max => max(ans[s], u64::from(p[s])),
                     PixelCalc::Av => ans[s] + u64::from(p[s]),
                     PixelCalc::Diff => todo!(),
+                    PixelCalc::Zero => 0,
                 }
             }
             count += 1;
@@ -69,6 +72,7 @@ impl TryFrom<char> for PixelCalc {
             'x' => Ok(Self::Max),
             'a' => Ok(Self::Av),
             'd' => Ok(Self::Diff),
+            'z' => Ok(Self::Zero),
             _ => Err("Invalid".into()),
         }
     }
@@ -81,6 +85,7 @@ impl Display for PixelCalc {
             PixelCalc::Max => 'x',
             PixelCalc::Av => 'a',
             PixelCalc::Diff => 'd',
+            PixelCalc::Zero => 'z',
         };
         write!(f, "{c}")
     }
