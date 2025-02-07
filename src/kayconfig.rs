@@ -12,6 +12,7 @@ pub enum PixelCalc {
     Min,
     Max,
     Av,
+    Diff,
 }
 
 impl PixelCalc {
@@ -20,6 +21,13 @@ impl PixelCalc {
             PixelCalc::Min => min(x, y),
             PixelCalc::Max => max(x, y),
             PixelCalc::Av => (x + y) / 2,
+            PixelCalc::Diff => {
+                if x > y {
+                    x - y
+                } else {
+                    y - x
+                }
+            }
         }
     }
 
@@ -32,6 +40,7 @@ impl PixelCalc {
                     PixelCalc::Min => min(ans[s], u64::from(p[s])),
                     PixelCalc::Max => max(ans[s], u64::from(p[s])),
                     PixelCalc::Av => ans[s] + u64::from(p[s]),
+                    PixelCalc::Diff => todo!(),
                 }
             }
             count += 1;
@@ -59,6 +68,7 @@ impl TryFrom<char> for PixelCalc {
             'n' => Ok(Self::Min),
             'x' => Ok(Self::Max),
             'a' => Ok(Self::Av),
+            'd' => Ok(Self::Diff),
             _ => Err("Invalid".into()),
         }
     }
@@ -70,6 +80,7 @@ impl Display for PixelCalc {
             PixelCalc::Min => 'n',
             PixelCalc::Max => 'x',
             PixelCalc::Av => 'a',
+            PixelCalc::Diff => 'd',
         };
         write!(f, "{c}")
     }
