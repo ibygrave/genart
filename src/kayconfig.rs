@@ -32,25 +32,55 @@ impl PixelCalc {
             PixelCalc::Zero => 0,
         }
     }
+}
 
-    pub fn scan<'a>(&self, pixels: impl Iterator<Item = &'a Rgb<u8>>) -> Rgb<u8> {
+trait PixelFold {
+    fn channel_fold(acc: u64, p: u8) -> u64;
+    #[allow(clippy::trivially_copy_pass_by_ref)]
+    fn pixel_fold(acc: (Rgb<u64>, u64), p: &Rgb<u8>) -> (Rgb<u64>, u64) {
         let mut ans = Rgb([0u64; 3]);
-        let mut count = 0u64;
-        for p in pixels {
-            for s in 0..3 {
-                ans[s] = match self {
-                    PixelCalc::Min => min(ans[s], u64::from(p[s])),
-                    PixelCalc::Max => max(ans[s], u64::from(p[s])),
-                    PixelCalc::Av => ans[s] + u64::from(p[s]),
-                    PixelCalc::Diff => todo!(),
-                    PixelCalc::Zero => 0,
-                }
+        for s in 0..3 {
+            ans[s] = Self::channel_fold(acc.0[s], p[s]);
+        }
+        (ans, acc.1 + 1)
+    }
+}
+
+struct MinPixelFold;
+struct MaxPixelFold;
+struct AvPixelFold;
+
+impl PixelFold for MinPixelFold {
+    fn channel_fold(acc: u64, p: u8) -> u64 {
+        min(acc, u64::from(p))
+    }
+}
+
+impl PixelFold for MaxPixelFold {
+    fn channel_fold(acc: u64, p: u8) -> u64 {
+        max(acc, u64::from(p))
+    }
+}
+
+impl PixelFold for AvPixelFold {
+    fn channel_fold(acc: u64, p: u8) -> u64 {
+        acc + u64::from(p)
+    }
+}
+
+impl PixelCalc {
+    pub fn scan<'a>(&self, pixels: impl Iterator<Item = &'a Rgb<u8>>) -> Rgb<u8> {
+        let init = (Rgb([0; 3]), 0);
+        let ans = match self {
+            PixelCalc::Min => pixels.fold(init, MinPixelFold::pixel_fold).0,
+            PixelCalc::Max => pixels.fold(init, MaxPixelFold::pixel_fold).0,
+            PixelCalc::Av => {
+                let (sum, count) = pixels.fold(init, AvPixelFold::pixel_fold);
+                sum.map(|chan| chan / count)
             }
-            count += 1;
-        }
-        if let PixelCalc::Av = self {
-            ans = ans.map(|s| s / count);
-        }
+            PixelCalc::Diff => todo!(),
+            PixelCalc::Zero => Rgb([0; 3]),
+        };
         Rgb([
             u8::try_from(ans[0]).unwrap(),
             u8::try_from(ans[1]).unwrap(),
