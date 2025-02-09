@@ -35,14 +35,9 @@ impl PixelCalc {
 }
 
 trait PixelFold {
-    fn channel_fold(acc: u64, p: u8) -> u64;
-    #[allow(clippy::trivially_copy_pass_by_ref)]
-    fn pixel_fold(acc: (Rgb<u64>, u64), p: &Rgb<u8>) -> (Rgb<u64>, u64) {
-        let mut ans = Rgb([0u64; 3]);
-        for s in 0..3 {
-            ans[s] = Self::channel_fold(acc.0[s], p[s]);
-        }
-        (ans, acc.1 + 1)
+    fn channel_fold(acc: u64, p: u64) -> u64;
+    fn pixel_fold(acc: (Rgb<u64>, u64), p: Rgb<u64>) -> (Rgb<u64>, u64) {
+        (acc.0.map2(&p, Self::channel_fold), acc.1 + 1)
     }
 }
 
@@ -51,25 +46,26 @@ struct MaxPixelFold;
 struct AvPixelFold;
 
 impl PixelFold for MinPixelFold {
-    fn channel_fold(acc: u64, p: u8) -> u64 {
-        min(acc, u64::from(p))
+    fn channel_fold(acc: u64, p: u64) -> u64 {
+        min(acc, p)
     }
 }
 
 impl PixelFold for MaxPixelFold {
-    fn channel_fold(acc: u64, p: u8) -> u64 {
-        max(acc, u64::from(p))
+    fn channel_fold(acc: u64, p: u64) -> u64 {
+        max(acc, p)
     }
 }
 
 impl PixelFold for AvPixelFold {
-    fn channel_fold(acc: u64, p: u8) -> u64 {
-        acc + u64::from(p)
+    fn channel_fold(acc: u64, p: u64) -> u64 {
+        acc + p
     }
 }
 
 impl PixelCalc {
     pub fn scan<'a>(&self, pixels: impl Iterator<Item = &'a Rgb<u8>>) -> Rgb<u8> {
+        let pixels = pixels.map(|p| Rgb([u64::from(p[0]), u64::from(p[1]), u64::from(p[1])]));
         let init = (Rgb([0; 3]), 0);
         let ans = match self {
             PixelCalc::Min => pixels.fold(init, MinPixelFold::pixel_fold).0,
