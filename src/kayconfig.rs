@@ -74,7 +74,15 @@ impl PixelCalc {
                 let (sum, count) = pixels.fold(init, AvPixelFold::pixel_fold);
                 sum.map(|chan| chan / count)
             }
-            PixelCalc::Diff => todo!(),
+            PixelCalc::Diff => {
+                let ((min_p, _), (max_p, _)) = pixels.fold((init, init), |(acc0, acc1), p| {
+                    (
+                        MinPixelFold::pixel_fold(acc0, p),
+                        MaxPixelFold::pixel_fold(acc1, p),
+                    )
+                });
+                min_p.map2(&max_p, |min_c, max_c| max_c - min_c)
+            }
             PixelCalc::Zero => Rgb([0; 3]),
         };
         Rgb([
