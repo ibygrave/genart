@@ -22,13 +22,7 @@ impl PixelCalc {
             PixelCalc::Min => min(x, y),
             PixelCalc::Max => max(x, y),
             PixelCalc::Av => (x + y) / 2,
-            PixelCalc::Diff => {
-                if x > y {
-                    x - y
-                } else {
-                    y - x
-                }
-            }
+            PixelCalc::Diff => x.abs_diff(y),
             PixelCalc::Zero => 0,
         }
     }
