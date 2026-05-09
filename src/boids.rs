@@ -1,7 +1,7 @@
 use std::{borrow::BorrowMut, ops::Range};
 
 use anyhow::Result;
-use rand::{distr::Distribution, Rng};
+use rand::distr::Distribution;
 
 use crate::field::Field;
 
@@ -56,13 +56,13 @@ impl Flock {
             boids: (0..nboids)
                 .map(|me| {
                     let follow = loop {
-                        let b = rng.random_range(0..nboids);
+                        let b = rand::random_range(0..nboids);
                         if b != me {
                             break b;
                         }
                     };
                     let flee = loop {
-                        let b = rng.random_range(0..nboids);
+                        let b = rand::random_range(0..nboids);
                         if b != me && b != follow {
                             break b;
                         }
@@ -70,8 +70,8 @@ impl Flock {
                     Boid {
                         x: x_range.sample(&mut rng),
                         y: y_range.sample(&mut rng),
-                        dx: rng.random_range(-1f64..=1f64),
-                        dy: rng.random_range(-1f64..=1f64),
+                        dx: rand::random_range(-1f64..=1f64),
+                        dy: rand::random_range(-1f64..=1f64),
                         follow,
                         flee,
                     }

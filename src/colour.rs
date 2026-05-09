@@ -3,10 +3,7 @@
 use std::collections::VecDeque;
 
 use anyhow::Result;
-use rand::{
-    distr::{Distribution, Uniform},
-    Rng,
-};
+use rand::distr::{Distribution, Uniform};
 
 #[derive(Clone, Copy, Debug)]
 pub struct Colour {
@@ -86,9 +83,8 @@ impl Colours {
         }
 
         // enhance the two new colour lists with random new colours
-        let mut rng = rand::rng();
-        left.insert(rng.random_range(0..left.len()), Colour::mix(&left)?);
-        right.insert(rng.random_range(0..right.len()), Colour::mix(&right)?);
+        left.insert(rand::random_range(0..left.len()), Colour::mix(&left)?);
+        right.insert(rand::random_range(0..right.len()), Colour::mix(&right)?);
         Ok((Self(left), Self(right)))
     }
 

@@ -1,5 +1,3 @@
-use rand::Rng;
-
 use crate::Colours;
 use anyhow::Result;
 
@@ -65,8 +63,7 @@ impl Region {
         let x_inner = self.x.inner();
         let y_inner = self.y.inner();
         let perim = x_inner.size + y_inner.size;
-        let mut rng = rand::rng();
-        let split_point = rng.random_range(0..perim);
+        let split_point = rand::random_range(0..perim);
         if split_point < x_inner.size {
             // Horizontal split
             let (low_x, high_x) = x_inner.split(split_point);
