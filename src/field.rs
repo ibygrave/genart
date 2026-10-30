@@ -38,6 +38,19 @@ impl Field {
         }
         Ok(())
     }
+
+    pub fn set(&mut self, x: i32, y: i32) -> Result<()> {
+        if x < 0 || x >= self.surface.width() || y < 0 || y >= self.surface.height() {
+            return Ok(());
+        }
+        let pixel_ix = self.surface.stride() * y + 4 * x;
+        let mut data = self.surface.data()?;
+        for channel in [2, 1, 0] {
+            let subpixel_ix = usize::try_from(pixel_ix + channel)?;
+            data[subpixel_ix] = 255;
+        }
+        Ok(())
+    }
 }
 
 impl Drop for Field {

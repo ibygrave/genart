@@ -6,7 +6,7 @@ mod kayconfig;
 mod region;
 
 pub use boids::Flock;
-pub use colour::Colours;
+pub use colour::{Colour, Colours};
 pub use field::{Field, FieldArgs};
 pub use kayconfig::KayConfig;
 pub use region::Region;

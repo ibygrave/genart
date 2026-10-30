@@ -13,7 +13,7 @@ pub struct Colour {
 }
 
 impl Colour {
-    const BLACK: Self = Self {
+    pub const BLACK: Self = Self {
         r: 0f64,
         g: 0f64,
         b: 0f64,
@@ -58,6 +58,10 @@ impl Colour {
             .map(|(c, q)| c.scale(q * scale))
             .fold(Colour::BLACK, Colour::add))
     }
+
+    pub fn add_stop(&self, gradient: &cairo::LinearGradient, offset: f64) {
+        gradient.add_color_stop_rgb(offset, self.r, self.g, self.b);
+    }
 }
 
 pub struct Colours(VecDeque<Colour>);
@@ -92,7 +96,7 @@ impl Colours {
         let max_ix = (self.0.len() - 1) as f64;
         for (ix, colour) in self.0.iter().enumerate() {
             let offset = (ix as f64) / max_ix;
-            gradient.add_color_stop_rgb(offset, colour.r, colour.g, colour.b);
+            colour.add_stop(gradient, offset);
         }
     }
 }
