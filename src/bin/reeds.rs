@@ -30,6 +30,22 @@ impl Reed {
             self.x -= width;
         }
     }
+
+    fn grad_to(&self, other: &Self) -> cairo::LinearGradient {
+        let grad = cairo::LinearGradient::new(self.x, 0.0, other.x, 0.0);
+        self.colour.add_stop(&grad, 0.0);
+        Colour::BLACK.add_stop(&grad, 0.5);
+        other.colour.add_stop(&grad, 1.0);
+        grad
+    }
+
+    fn line_to(&self, other: &Self, ctx: &cairo::Context, y: f64) -> Result<()> {
+        let grad = self.grad_to(other);
+        ctx.set_source(&grad)?;
+        ctx.rectangle(self.x, y, other.x - self.x, 1.0);
+        ctx.fill()?;
+        Ok(())
+    }
 }
 
 fn main() -> Result<()> {
@@ -54,15 +70,7 @@ fn main() -> Result<()> {
         let mut reed_iter = reeds.iter();
         let mut reed_left = reed_iter.next().unwrap();
         for reed_right in reed_iter {
-            let grad =
-                cairo::LinearGradient::new(reed_left.x, f64::from(y), reed_right.x, f64::from(y));
-            reed_left.colour.add_stop(&grad, 0.0);
-            Colour::BLACK.add_stop(&grad, 0.5);
-            reed_right.colour.add_stop(&grad, 1.0);
-            ctx.set_source(&grad)?;
-            ctx.rectangle(reed_left.x, f64::from(y), reed_right.x - reed_left.x, 1.0);
-            ctx.fill()?;
-
+            reed_left.line_to(reed_right, &ctx, f64::from(y))?;
             reed_left = reed_right;
         }
 
